@@ -15,10 +15,42 @@ export function Workbench({ state, dispatch }: { state: WorkspaceState; dispatch
   const [insightOpenSeq, setInsightOpenSeq] = useState(0)
   const opener = useRef<HTMLElement | null>(null)
   const closeFocusSeq = useRef(0)
-  const clearPendingFocus = () => { setFactFocus(null); opener.current = null; closeFocusSeq.current++ }
-  const openInsight = (nodeId: string, target: HTMLElement) => { closeFocusSeq.current++; opener.current = target; setInsightOpenSeq(value => value + 1); dispatch({ type: 'openInsight', nodeId }) }
+  const focusCleanup = useRef<(() => void) | null>(null)
+  const cancelCloseFocus = () => { closeFocusSeq.current++; focusCleanup.current?.(); focusCleanup.current = null }
+  useLayoutEffect(() => () => { cancelCloseFocus() }, [])
+  const clearPendingFocus = () => { setFactFocus(null); opener.current = null; cancelCloseFocus() }
+  const openInsight = (nodeId: string, target: HTMLElement) => { cancelCloseFocus(); opener.current = target; setInsightOpenSeq(value => value + 1); dispatch({ type: 'openInsight', nodeId }) }
   const locate = (nodeId: string) => dispatch({ type: 'locateNode', nodeId, closeOverlay: window.innerWidth <= 1180 })
-  const closeInsight = () => { dispatch({ type: 'closeInsight' }); const target = opener.current; const selectedId = state.selectedId; const request = ++closeFocusSeq.current; requestAnimationFrame(() => { if (request !== closeFocusSeq.current) return; if (target?.isConnected && target.getClientRects().length) target.focus(); if (document.activeElement !== target) { if (selectedId) dispatch({ type: 'focusNode', nodeId: selectedId, moveKeyboardFocus: true }); else document.querySelector<HTMLButtonElement>('.segmented button[aria-pressed="true"]')?.focus() } }) }
+  const closeInsight = () => {
+    cancelCloseFocus()
+    dispatch({ type: 'closeInsight' })
+    const target = opener.current
+    const selectedId = state.selectedId
+    const request = ++closeFocusSeq.current
+    const cancelOnInteraction = (event: Event) => { if (event.isTrusted) cancelCloseFocus() }
+    const cancelOnFocus = () => cancelCloseFocus()
+    document.addEventListener('pointerdown', cancelOnInteraction, true)
+    document.addEventListener('keydown', cancelOnInteraction, true)
+    document.addEventListener('focusin', cancelOnFocus, true)
+    window.addEventListener('blur', cancelOnFocus)
+    focusCleanup.current = () => {
+      document.removeEventListener('pointerdown', cancelOnInteraction, true)
+      document.removeEventListener('keydown', cancelOnInteraction, true)
+      document.removeEventListener('focusin', cancelOnFocus, true)
+      window.removeEventListener('blur', cancelOnFocus)
+    }
+    requestAnimationFrame(() => {
+      if (request !== closeFocusSeq.current) return
+      focusCleanup.current?.()
+      focusCleanup.current = null
+      if (target?.isConnected && target.getClientRects().length) target.focus()
+      if (document.activeElement !== target) {
+        const node = selectedId ? document.querySelector<HTMLButtonElement>(`.canvas button[data-node-id="${CSS.escape(selectedId)}"]`) : null
+        if (node?.isConnected && node.getClientRects().length) node.focus()
+        if (document.activeElement !== node) document.querySelector<HTMLButtonElement>('.segmented button[aria-pressed="true"]')?.focus()
+      }
+    })
+  }
   const playbackRef = useRef<HTMLButtonElement>(null)
   const restartRef = useRef<HTMLButtonElement>(null)
   const previous = useRef({ complete, scenario: state.scenario.id })
