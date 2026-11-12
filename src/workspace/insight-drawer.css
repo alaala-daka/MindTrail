@@ -1,0 +1,7 @@
+.insight-drawer { display: flex; flex-direction: column; min-height: 0; background: #151b24; color: #e8edf4; }
+.insight-header { flex: none; display: flex; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid #302a48; color: #b3a7ff; }
+.insight-body { overflow: auto; padding: 16px; }
+.insight-body section { margin-bottom: 24px; }
+.insight-body h3 { color: #b3a7ff; }
+.insight-body button { margin: 0 8px 8px 0; }
+.insight-body pre { white-space: pre-wrap; overflow-wrap: anywhere; }
