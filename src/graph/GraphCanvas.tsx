@@ -12,6 +12,13 @@ function Card({ data }: NodeProps<CardNode>) {
   return <><Handle type="target" position={Position.Left} /><button data-node-id={n.id} aria-pressed={data.selected} className={`graph-card ${n.kind} ${data.selected ? 'selected' : ''}`} onClick={e => { e.stopPropagation(); if (e.detail >= 2) data.onOpenInsight(n.id, e.currentTarget); else data.onSelect(n.id) }}><span className="graph-kind">{({ task:'任务', capability:'能力', api:'接口', file:'文件', group:'分组' })[n.kind]} {n.state && <em className={n.state}>{({ planned:'计划', active:'执行中', done:'完成' })[n.state]}</em>}</span><strong title={n.title}>{n.title}</strong></button><Handle type="source" position={Position.Right} /></>
 }
 const nodeTypes = { card: Card }
+// Keep connection geometry available when controlled nodes are replaced.
+export function cardHandles() {
+  return [
+    { type: 'target' as const, position: Position.Left, x: 0, y: NODE_HEIGHT / 2, width: 1, height: 1 },
+    { type: 'source' as const, position: Position.Right, x: NODE_WIDTH, y: NODE_HEIGHT / 2, width: 1, height: 1 },
+  ]
+}
 function Canvas(props: GraphCanvasProps) {
   const { fitView, setCenter, getZoom, viewportInitialized } = useReactFlow()
 
@@ -20,8 +27,8 @@ function Canvas(props: GraphCanvasProps) {
   const done = useRef(0)
   const structure = JSON.stringify([props.graph.nodes.map(n => n.id).sort(), props.graph.edges.map(e => [e.from,e.to,e.kind,e.id]).sort((a,b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))])
   const positions = useMemo(() => layoutGraph(props.graph), [structure])
-  const nodes: CardNode[] = props.graph.nodes.map(n => ({ id:n.id, type:'card', initialWidth:NODE_WIDTH, initialHeight:NODE_HEIGHT, position:positions.get(n.id)!, data:{ trail:n, selected:props.selectedId === n.id, onSelect:props.onSelect, onOpenInsight:props.onOpenInsight }, draggable:false, selectable:false, focusable:false }))
-  const edges = props.graph.edges.map(e => ({ id:e.id, source:e.from, target:e.to, label:e.kind === 'calls' ? '调用' : e.kind === 'imports' ? '引用' : '', markerEnd:e.kind === 'contains' ? undefined : { type:MarkerType.ArrowClosed }, style:{ stroke:'#64748b' }, labelStyle:{ fill:'#aab5c4', fontSize:11 }, labelBgStyle:{ fill:'#0d1219' } }))
+  const nodes: CardNode[] = props.graph.nodes.map(n => ({ id:n.id, type:'card', initialWidth:NODE_WIDTH, initialHeight:NODE_HEIGHT, handles:cardHandles(), position:positions.get(n.id)!, data:{ trail:n, selected:props.selectedId === n.id, onSelect:props.onSelect, onOpenInsight:props.onOpenInsight }, draggable:false, selectable:false, focusable:false }))
+  const edges = props.graph.edges.map(e => ({ id:e.id, source:e.from, target:e.to, domAttributes: { 'data-trail-from': e.from, 'data-trail-to': e.to, 'data-trail-kind': e.kind } as React.SVGAttributes<SVGGElement>, label:e.kind === 'calls' ? '调用' : e.kind === 'imports' ? '引用' : '', markerEnd:e.kind === 'contains' ? undefined : { type:MarkerType.ArrowClosed }, style:{ stroke:'#64748b' }, labelStyle:{ fill:'#aab5c4', fontSize:11 }, labelBgStyle:{ fill:'#0d1219' } }))
   useEffect(() => { if (!fitted.current && nodes.length) { const frame = requestAnimationFrame(() => { fitted.current = true; void fitView({ padding:0.25, nodes: nodes.map(n => ({ id: n.id })) }) }); return () => cancelAnimationFrame(frame) } }, [nodes.length, fitView])
   useEffect(() => {
     if (!props.focus || props.focus.requestId === done.current) return

@@ -1,3 +1,5 @@
+import fixture from '../../protocol/fixtures/v1-events.json'
+import type { TrailEvent } from './events'
 import { describe, expect, it } from 'vitest'
 import { scenarios } from '../demo/scenarios'
 import { projectGraph, projectSession } from './project'
@@ -44,7 +46,7 @@ it('filters call edges with invisible endpoints and retains visible nodes', () =
   const session = projectSession(scenarios[0].events, 8)
   const graph = projectGraph({ ...session, callEdges: [...session.callEdges, { id: 'hidden', from: 'login', to: 'handler', kind: 'calls' }] }, 'calls')
   expect(graph.nodes.map(node => node.id)).toEqual(['login-api', 'handler', 'password'])
-  expect(graph.edges.map(edge => edge.id)).toEqual(['login-api:calls:handler', 'handler:imports:password'])
+  expect(graph.edges.map(edge => edge.id)).toEqual(['call:6', 'call:7'])
 })
 
 it('preserves planned state, completion time, and identifiable quoted evidence', () => {
@@ -64,4 +66,30 @@ it('isolates repeated projections across tasks with shared node IDs', () => {
   expect(other.nodes.get('handler')?.title).toBe('src/orders/export.ts')
   expect(again).toEqual(first)
   expect(first.nodes.get('handler')?.title).toBe('src/auth/login.ts')
+})
+
+it('projects the shared v1 fixture deterministically', () => {
+  const events = fixture as TrailEvent[]
+  const result = projectSession(events, events.length)
+  expect(result).toEqual(projectSession([...events], events.length))
+  expect(['cap', 'api', 'file'].every(id => result.nodes.has(id))).toBe(true)
+  expect(projectGraph(result, 'calls').edges).toContainEqual({ id: 'call:5', from: 'api', to: 'file', kind: 'calls' })
+  expect(result.status).toBe('done')
+  const start = projectSession(events, 1)
+  expect(['cap', 'api', 'file'].some(id => start.nodes.has(id))).toBe(false)
+  expect(start.callEdges).toEqual([])
+  expect(start.status).not.toBe('done')
+})
+
+it('retains repeated and colon-containing call facts with stable distinct IDs', () => {
+  const base = { v: 1 as const, session: 's', ts: '2024-01-01T00:00:00Z' }
+  const nodes: TrailEvent[] = ['a', 'b:calls:c', 'a:calls:b', 'c'].map((id, i) => ({ ...base, seq: i + 1, type: 'api.expose', payload: { id, kind: 'fn', signature: id } }))
+  const edges: TrailEvent[] = [
+    { ...base, seq: 5, type: 'call.edge', payload: { from: 'a', to: 'b:calls:c', kind: 'calls' } },
+    { ...base, seq: 6, type: 'call.edge', payload: { from: 'a:calls:b', to: 'c', kind: 'calls' } },
+    { ...base, seq: 7, type: 'call.edge', payload: { from: 'a', to: 'b:calls:c', kind: 'calls' } },
+  ]
+  const events = [...nodes, ...edges]
+  expect(projectGraph(projectSession(events, events.length), 'calls').edges.map(e => e.id)).toEqual(['call:5', 'call:6', 'call:7'])
+  expect(projectSession(events, 6).callEdges).toEqual(projectSession(events, 7).callEdges.slice(0, 2))
 })

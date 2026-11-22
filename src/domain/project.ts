@@ -34,7 +34,7 @@ export function projectSession(events: readonly TrailEvent[], appliedCount: numb
         }
         break
       }
-      case 'call.edge': callEdges.push({ id: `${event.payload.from}:${event.payload.kind}:${event.payload.to}`, ...event.payload }); break
+      case 'call.edge': callEdges.push({ id: `call:${event.seq}`, ...event.payload }); break
       case 'task.done': status = 'done'; update('root', {}); break
     }
   }

@@ -2,17 +2,18 @@ import { useLayoutEffect, useRef } from 'react'
 import type { SessionProjection } from '../domain/project'
 import { getNodeEvidence } from './evidence'
 import type { FactTab } from './state'
+import type { DataSource } from '../domain/insights'
 
 export type FactFocus = { requestId: number; kind: 'quote' | 'diff'; evidenceId: string }
 
-export function FactDrawer({ session, selectedId, expanded, tab, focus, onToggle, onTab, onLocate, onOpenInsight }: {
-  session: SessionProjection; selectedId: string | null; expanded: boolean; tab: FactTab; focus?: FactFocus | null
+export function FactDrawer({ session, source, selectedId, expanded, tab, focus, onToggle, onTab, onLocate, onOpenInsight }: {
+  session: SessionProjection; source: DataSource; selectedId: string | null; expanded: boolean; tab: FactTab; focus?: FactFocus | null
   onToggle: () => void; onTab: (tab: FactTab) => void; onLocate: (nodeId: string) => void; onOpenInsight: (nodeId: string, opener: HTMLElement) => void
 }) {
   const content = useRef<HTMLDivElement>(null)
   const consumed = useRef<{ sessionId: string; requestId: number } | null>(null)
   const node = selectedId ? session.nodes.get(selectedId) : undefined
-  const evidence = node ? getNodeEvidence(session, node.id) : []
+  const evidence = node ? getNodeEvidence(session, node.id, source) : []
   useLayoutEffect(() => {
     if (!focus || !expanded || (consumed.current?.sessionId === session.id && consumed.current.requestId === focus.requestId)) return
     const target = Array.from(content.current?.querySelectorAll<HTMLElement>('[data-evidence-kind]') ?? []).find(item => item.dataset.evidenceKind === focus.kind && item.dataset.evidenceId === focus.evidenceId)

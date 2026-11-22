@@ -1,0 +1,9 @@
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\once_cell-fd36a77660da678a.d: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\imp_std.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\race.rs
+
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\libonce_cell-fd36a77660da678a.rlib: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\imp_std.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\race.rs
+
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\libonce_cell-fd36a77660da678a.rmeta: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\imp_std.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\race.rs
+
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\lib.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\imp_std.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\once_cell-1.21.4\src\race.rs:

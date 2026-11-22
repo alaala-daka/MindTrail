@@ -1,0 +1,7 @@
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\tracing_attributes-77c3260456d939ab.d: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\attr.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\expand.rs
+
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\tracing_attributes-77c3260456d939ab.dll: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\attr.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\expand.rs
+
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\lib.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\attr.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\tracing-attributes-0.1.31\src\expand.rs:

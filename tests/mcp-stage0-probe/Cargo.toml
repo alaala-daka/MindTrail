@@ -1,0 +1,13 @@
+[package]
+name = "mindtrail-mcp-stage0-probe"
+version = "0.1.0"
+edition = "2024"
+[dependencies]
+rmcp = { version = "=3.6.0", default-features = false, features = ["server"] }
+hyper = { version = "=1.12.0", features = ["client", "http1"] }
+hyper-util = { version = "=0.1.21", features = ["tokio"] }
+time = { version = "=0.3.55", features = ["formatting"] }
+serde_json = { version = "1", features = ["arbitrary_precision", "raw_value"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["rt", "macros", "sync", "time"] }
+

@@ -2,8 +2,10 @@ import type { GraphFocus } from '../graph/GraphCanvas'
 import type { Scenario } from '../demo/scenarios'
 import { projectGraph, projectSession, type GraphMode } from '../domain/project'
 export type FactTab = 'quotes' | 'diff' | 'calls' | 'meta'
-export type WorkspaceState = { scenario: Scenario; appliedCount: number; playing: boolean; runId: number; mode: GraphMode; selectedId: string | null; hierarchySelectionId: string | null; factTab: FactTab; factsExpanded: boolean; insightNodeId: string | null; focus: GraphFocus | null; focusSeq: number }
+export type TaskIdentity = { kind: 'demo'; id: string } | { kind: 'real'; storeId: string; session: string }
+export type WorkspaceState = { identity: TaskIdentity; scenario: Scenario; appliedCount: number; playing: boolean; runId: number; mode: GraphMode; selectedId: string | null; hierarchySelectionId: string | null; factTab: FactTab; factsExpanded: boolean; insightNodeId: string | null; focus: GraphFocus | null; focusSeq: number }
 export type WorkspaceAction =
+  | { type: 'updateReal'; scenario: Scenario; identity: Extract<TaskIdentity, { kind: 'real' }> }
   | { type: 'locateNode'; nodeId: string; closeOverlay: boolean }
   | { type: 'revealEvidence'; nodeId: string; tab: 'quotes' | 'diff'; closeOverlay: boolean }
   | { type: 'switchTask'; scenario: Scenario } | { type: 'restart' } | { type: 'togglePlayback' }
@@ -12,11 +14,16 @@ export type WorkspaceAction =
   | { type: 'selectNode'; nodeId: string } | { type: 'openInsight'; nodeId: string } | { type: 'closeInsight' }
   | { type: 'setFactTab'; tab: FactTab } | { type: 'toggleFacts' }
 export function createWorkspace(scenario: Scenario): WorkspaceState {
-  return { scenario, appliedCount: scenario.initialCount, playing: false, runId: 0, mode: 'hierarchy', selectedId: scenario.initialNodeId, hierarchySelectionId: null, factTab: 'quotes', factsExpanded: true, insightNodeId: null, focus: null, focusSeq: 0 }
+  return { identity: { kind: 'demo', id: scenario.id }, scenario, appliedCount: scenario.initialCount, playing: false, runId: 0, mode: 'hierarchy', selectedId: scenario.initialNodeId, hierarchySelectionId: null, factTab: 'quotes', factsExpanded: true, insightNodeId: null, focus: null, focusSeq: 0 }
 }
 export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
   switch (action.type) {
-    case 'switchTask': return action.scenario.id === state.scenario.id ? state : { ...createWorkspace(action.scenario), runId: state.runId + 1 }
+    case 'updateReal': {
+      const same = state.identity.kind === 'real' && state.identity.storeId === action.identity.storeId && state.identity.session === action.identity.session
+      const base = same ? state : { ...createWorkspace(action.scenario), runId: state.runId + 1 }
+      return { ...base, identity: action.identity, scenario: action.scenario, appliedCount: action.scenario.events.length, playing: false }
+    }
+    case 'switchTask': return state.identity.kind === 'demo' && action.scenario.id === state.identity.id ? state : { ...createWorkspace(action.scenario), runId: state.runId + 1 }
     case 'restart': return { ...state, appliedCount: 1, playing: true, runId: state.runId + 1, mode: 'hierarchy', selectedId: 'root', hierarchySelectionId: null, insightNodeId: null, focus: null }
     case 'togglePlayback': return state.appliedCount >= state.scenario.events.length ? state : { ...state, playing: !state.playing, runId: state.runId + 1 }
     case 'tick': {

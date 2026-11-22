@@ -6,9 +6,15 @@ import { FactDrawer, type FactFocus } from './FactDrawer'
 import { InsightDrawer } from './InsightDrawer'
 import { useState } from 'react'
 import type { WorkspaceAction, WorkspaceState } from './state'
+import type { Snapshot } from './gateway'
 
-export function Workbench({ state, dispatch }: { state: WorkspaceState; dispatch: Dispatch<WorkspaceAction> }) {
+export function Workbench({ state, dispatch, snapshot, selectReal, onHome }: { state: WorkspaceState; dispatch: Dispatch<WorkspaceAction>; snapshot: Snapshot | null; selectReal: (session: string | null) => void; onHome?: () => void }) {
+  const real = state.identity.kind === 'real'
+  const taskKey = JSON.stringify(state.identity)
   const session = projectSession(state.scenario.events, state.appliedCount)
+  const selectedSummary = snapshot?.sessions.find(item => item.session === snapshot.selected)
+  const selectedWatermark = Math.max(selectedSummary?.last_seq ?? 0, snapshot?.watermark ?? 0)
+  const syncing = state.appliedCount < selectedWatermark || ((selectedSummary?.status === 'done' || snapshot?.status === 'done') && session.status !== 'done')
   const complete = state.appliedCount >= state.scenario.events.length
   const [factFocus, setFactFocus] = useState<FactFocus | null>(null)
   const factSeq = useRef(0)
@@ -67,8 +73,8 @@ export function Workbench({ state, dispatch }: { state: WorkspaceState; dispatch
     <main className="app">
       <header className="topbar">
         <div className="topbar-title">
-          <strong className="brand">◈ MindTrail</strong><span className="divider" />
-          <strong>{state.scenario.title}</strong><span className="badge">内置样例</span>
+          <strong className="brand">◈ MindTrail</strong>{onHome && <button onClick={onHome}>连接与任务</button>}<span className="divider" />
+          <strong>{state.scenario.title}</strong><span className="badge">{real ? '真实任务' : '内置样例'}</span>
         </div>
         <div className="segmented" aria-label="视图切换">
           {(['hierarchy', 'calls'] as const).map(mode => (
@@ -78,19 +84,29 @@ export function Workbench({ state, dispatch }: { state: WorkspaceState; dispatch
           ))}
         </div>
         <div className="toolbar">
+          {real ? <span className="progress">{session.status === 'done' ? '已完成' : syncing ? '补读中' : snapshot?.error ?? `已读取 ${state.appliedCount}`}</span> : <>
           <span className="progress">{complete ? '演示完成' : `${state.appliedCount} / ${state.scenario.events.length}`}</span><span className="sr-only" aria-live="polite">{complete ? '演示完成' : ''}</span>
           <button ref={playbackRef} onClick={() => dispatch({ type: 'togglePlayback' })}>{state.playing ? '暂停' : '继续播放'}</button>
           <button ref={restartRef} onClick={() => { clearPendingFocus(); dispatch({ type: 'restart' }) }}>从头演示</button>
+          </>}
         </div>
       </header>
       <div className="workspace-body">
         <aside className="task-list">
-          <div className="section-label">任务列表 <span>{scenarios.length}</span></div>
+          <div className="section-label">真实任务</div>
+          {snapshot?.error && <p role="status">{snapshot.error}</p>}
+          {snapshot?.changedStore && <p role="status">数据库已变更</p>}
+          {snapshot?.sessions.map(item => {
+            const active = snapshot.selected === item.session
+            const status = active ? (session.status === 'done' ? '已完成' : syncing ? '补读中' : '运行中') : item.status === 'done' ? '已完成' : '运行中'
+            return <button className={`task ${active ? 'active' : ''}`} aria-current={active ? 'true' : undefined} key={item.session} onClick={() => { if (!active) { clearPendingFocus(); selectReal(item.session) } }}><span className="task-title">{item.title}</span><span className="task-status">{status} · {active ? selectedWatermark : item.last_seq}</span></button>
+          })}
+          <div className="section-label">内置样例 <span>{scenarios.length}</span></div>
           {scenarios.map(scenario => {
-            const active = scenario.id === state.scenario.id
+            const active = !real && scenario.id === state.scenario.id
             const status = active ? session.status : projectSession(scenario.events, scenario.initialCount).status
             return (
-              <button className={`task ${active ? 'active' : ''}`} aria-current={active ? 'true' : undefined} key={scenario.id} onClick={() => { if (!active) clearPendingFocus(); dispatch({ type: 'switchTask', scenario }) }}>
+              <button className={`task ${active ? 'active' : ''}`} aria-current={active ? 'true' : undefined} key={scenario.id} onClick={() => { if (!active) clearPendingFocus(); selectReal(null); dispatch({ type: 'switchTask', scenario }) }}>
                 <span className="task-title">{scenario.title}</span>
                 <span className="task-status"><i className={status === 'done' ? 'done' : ''} />{status === 'done' ? '已完成' : '运行中'}</span>
               </button>
@@ -100,11 +116,11 @@ export function Workbench({ state, dispatch }: { state: WorkspaceState; dispatch
         <section className="center-workspace">
           <div className="canvas" aria-label="工作区">
             <div className="canvas-heading"><span>任务地图</span><small>{state.mode === 'hierarchy' ? '层级视图' : '调用视图'} · {session.nodes.size} 个节点</small></div>
-            <GraphCanvas key={state.scenario.id} graph={projectGraph(session, state.mode)} selectedId={state.selectedId} focus={state.focus} onSelect={nodeId => dispatch({ type: 'selectNode', nodeId })} onOpenInsight={openInsight} />
+            <GraphCanvas key={taskKey} graph={projectGraph(session, state.mode)} selectedId={state.selectedId} focus={state.focus} onSelect={nodeId => dispatch({ type: 'selectNode', nodeId })} onOpenInsight={openInsight} />
           </div>
-          <FactDrawer key={state.scenario.id} session={session} selectedId={state.selectedId} expanded={state.factsExpanded} tab={state.factTab} onToggle={() => dispatch({ type: 'toggleFacts' })} onTab={tab => dispatch({ type: 'setFactTab', tab })} onOpenInsight={openInsight} focus={factFocus} onLocate={locate} />
+          <FactDrawer key={taskKey} session={session} source={real ? 'real' : 'demo'} selectedId={state.selectedId} expanded={state.factsExpanded} tab={state.factTab} onToggle={() => dispatch({ type: 'toggleFacts' })} onTab={tab => dispatch({ type: 'setFactTab', tab })} onOpenInsight={openInsight} focus={factFocus} onLocate={locate} />
         </section>
-        {state.insightNodeId && <InsightDrawer key={state.scenario.id + ':' + state.insightNodeId} session={session} nodeId={state.insightNodeId} openSeq={insightOpenSeq} onClose={closeInsight} onLocateNode={locate} onRevealEvidence={ref => {
+        {state.insightNodeId && <InsightDrawer key={taskKey + ':' + state.insightNodeId} session={session} source={real ? 'real' : 'demo'} storeId={state.identity.kind === 'real' ? state.identity.storeId : undefined} nodeId={state.insightNodeId} openSeq={insightOpenSeq} onClose={closeInsight} onLocateNode={locate} onRevealEvidence={ref => {
           if (ref.kind === 'src') return
           dispatch({ type: 'revealEvidence', nodeId: ref.nodeId, tab: ref.kind === 'quote' ? 'quotes' : 'diff', closeOverlay: window.innerWidth <= 1180 })
           setFactFocus({ requestId: ++factSeq.current, kind: ref.kind, evidenceId: ref.id })

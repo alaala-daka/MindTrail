@@ -57,6 +57,10 @@ button:focus-visible{outline:2px solid #9b8cff;outline-offset:2px}
 .toolbar { justify-self: end; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.connection-home { display: block; overflow: auto; padding: 32px; }
+.connection-home nav { display: flex; gap: 12px; margin: 16px 0; }
+.connection-home section { max-width: 800px; padding: 20px; border: 1px solid #354252; border-radius: 8px; }
+.connection-home pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .canvas-heading{z-index:2;pointer-events:none}.react-flow{width:100%;height:100%}.react-flow__handle{opacity:0;pointer-events:none}.graph-card{width:220px;height:74px;text-align:left;padding:10px 14px;border:1px solid #354252;border-radius:8px;background:#1a222d;display:flex;flex-direction:column;gap:8px}.graph-card.selected{border-color:#a99cff;box-shadow:0 0 0 2px #7668be}.graph-card strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.graph-kind{font-size:11px;color:#a99cff}.graph-card.api .graph-kind{color:#70c8cf}.graph-card.file .graph-kind{color:#d5ab70}.graph-kind em{font-style:normal;margin-left:8px;color:#aab5c4}.graph-kind em.active{color:#e8bd71}.graph-kind em.done{color:#78d59b}.fit-button{position:absolute;z-index:3;right:16px;bottom:16px;background:#1b222d;border:1px solid #394454;border-radius:5px;padding:7px 10px}
 .react-flow__node{pointer-events:all}
 .graph-container{width:100%;height:100%}

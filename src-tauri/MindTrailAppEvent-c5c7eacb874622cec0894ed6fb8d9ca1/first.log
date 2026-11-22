@@ -1,0 +1,4 @@
+
+running 1 test
+failed to load the default window icon from the application icon resource: Can not load Image from icon resources: 指定的映像文件不包含资源区域。 (0x80070714)
+test app_tests::desktop_ui_isolated_fixture has been running for over 60 seconds

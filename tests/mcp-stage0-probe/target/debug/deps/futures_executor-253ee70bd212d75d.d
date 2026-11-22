@@ -1,0 +1,9 @@
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\futures_executor-253ee70bd212d75d.d: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\local_pool.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\enter.rs
+
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\libfutures_executor-253ee70bd212d75d.rlib: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\local_pool.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\enter.rs
+
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\deps\libfutures_executor-253ee70bd212d75d.rmeta: C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\lib.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\local_pool.rs C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\enter.rs
+
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\lib.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\local_pool.rs:
+C:\Users\aefar\source\repos\MindTrail\.tools\cargo\registry\src\rsproxy.cn-e3de039b2554c837\futures-executor-0.3.34\src\enter.rs:
