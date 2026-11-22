@@ -1,0 +1,9 @@
+[
+ {"v":1,"session":"fixture-v1","seq":1,"ts":"2026-11-13T10:00:00+08:00","type":"task.start","payload":{"title":"Fixture task","goal":"Exercise projection","project":"MindTrail"}},
+ {"v":1,"session":"fixture-v1","seq":2,"ts":"2026-11-13T10:00:00+08:00","type":"capability.intent","payload":{"id":"cap","title":"Capability"}},
+ {"v":1,"session":"fixture-v1","seq":3,"ts":"2026-11-13T10:00:00+08:00","type":"api.expose","payload":{"id":"api","capabilityId":"cap","kind":"fn","signature":"run()"}},
+ {"v":1,"session":"fixture-v1","seq":4,"ts":"2026-11-13T10:00:00+08:00","type":"file.change","payload":{"id":"file","capabilityId":"cap","path":"src/example.ts","action":"create","stats":{"add":1,"del":0},"quote":"Example evidence","context":"Fixture context"}},
+ {"v":1,"session":"fixture-v1","seq":5,"ts":"2026-11-13T10:00:00+08:00","type":"call.edge","payload":{"from":"api","to":"file","kind":"calls"}},
+ {"v":1,"session":"fixture-v1","seq":6,"ts":"2026-11-13T10:00:00+08:00","type":"capability.done","payload":{"id":"cap"}},
+ {"v":1,"session":"fixture-v1","seq":7,"ts":"2026-11-13T10:00:00+08:00","type":"task.done","payload":{}}
+]

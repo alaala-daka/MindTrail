@@ -1,0 +1,9 @@
+2026-11-14 16:59:55.372: [INFO] CurrentProfilePath: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-a19c7385d13cfc745a36538d42b0a63f\webview\EBWebView\Default
+2026-11-14 16:59:55.372: [INFO] Profiles total count: 1
+2026-11-14 16:59:55.372: [INFO] Profile: name=用户配置 1 path=C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-a19c7385d13cfc745a36538d42b0a63f\webview\EBWebView\Default lastActive=null
+2026-11-14 16:59:55.372: [INFO] LastUsedProfileDir: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-a19c7385d13cfc745a36538d42b0a63f\webview\EBWebView\Default
+2026-11-14 16:59:55.372: [INFO] OnDoneLoading sync enabled: 0
+2026-11-14 16:59:55.372: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-11-14 16:59:55.372: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-11-14 16:59:55.372: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-11-14 17:00:26.304: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1

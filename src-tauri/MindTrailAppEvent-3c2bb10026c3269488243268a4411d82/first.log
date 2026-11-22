@@ -1,0 +1,3 @@
+
+running 1 test
+failed to load the default window icon from the application icon resource: Can not load Image from icon resources: 指定的映像文件不包含资源区域。 (0x80070714)

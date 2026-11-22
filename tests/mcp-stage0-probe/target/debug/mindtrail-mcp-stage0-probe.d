@@ -1,0 +1,1 @@
+C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\target\debug\mindtrail-mcp-stage0-probe.exe: C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\src\..\..\..\src-tauri\src\protocol\raw.rs C:\Users\aefar\source\repos\MindTrail\tests\mcp-stage0-probe\src\main.rs

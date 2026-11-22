@@ -1,0 +1,1 @@
+exit checks failed: gate not reached; gateway status: Unavailable { message: "Gateway directory failed: open parent for state: 拒绝访问。 (os error 5) Check the gateway data directory and restart the application." }

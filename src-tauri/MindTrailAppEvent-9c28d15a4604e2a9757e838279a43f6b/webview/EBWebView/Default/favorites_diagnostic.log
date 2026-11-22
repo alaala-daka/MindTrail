@@ -1,0 +1,19 @@
+2026-11-14 17:15:07.401: [INFO] CurrentProfilePath: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default
+2026-11-14 17:15:07.401: [INFO] Profiles total count: 1
+2026-11-14 17:15:07.401: [INFO] Profile: name=用户配置 1 path=C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default lastActive=null
+2026-11-14 17:15:07.401: [INFO] LastUsedProfileDir: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default
+2026-11-14 17:15:07.401: [INFO] OnDoneLoading sync enabled: 0
+2026-11-14 17:15:07.401: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-11-14 17:15:07.401: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-11-14 17:15:07.401: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-11-14 17:15:59.755: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-11-14 17:16:00.427: [INFO] CurrentProfilePath: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default
+2026-11-14 17:16:00.427: [INFO] Profiles total count: 1
+2026-11-14 17:16:00.427: [INFO] Profile: name=用户配置 1 path=C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default lastActive=2026-11-14T17:15:07.723Z
+2026-11-14 17:16:00.427: [INFO] LastUsedProfileDir: C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default
+2026-11-14 17:16:00.427: [INFO] MostRecentlyActiveProfile: name=用户配置 1 path=C:\Users\aefar\source\repos\MindTrail\src-tauri\MindTrailAppEvent-9c28d15a4604e2a9757e838279a43f6b\webview\EBWebView\Default lastActive=2026-11-14T17:15:07.723Z
+2026-11-14 17:16:00.427: [INFO] OnDoneLoading sync enabled: 0
+2026-11-14 17:16:00.427: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-11-14 17:16:00.427: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-11-14 17:16:00.427: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-11-14 17:16:10.744: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1

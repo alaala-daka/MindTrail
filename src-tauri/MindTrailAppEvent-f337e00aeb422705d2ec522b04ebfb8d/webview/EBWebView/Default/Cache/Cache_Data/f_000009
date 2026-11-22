@@ -1,0 +1,228 @@
+import { c as invoke, d as transformCallback } from "/node_modules/.vite/deps/core-B745o8_P.js?v=a51db740";
+// node_modules/@tauri-apps/api/event.js
+/**
+* The event system allows you to emit events to the backend and listen to events from it.
+*
+* This package is also accessible with `window.__TAURI__.event` when [`app.withGlobalTauri`](https://v2.tauri.app/reference/config/#withglobaltauri) in `tauri.conf.json` is set to `true`.
+*
+* @remarks All commands used by this module (`core:event:allow-listen`,
+* `allow-unlisten`, `allow-emit` and `allow-emit-to`) are part of the
+* `core:event:default` permission set, which is enabled by default, so no extra
+* capability configuration is needed.
+*
+* @module
+*/
+/**
+* The built-in event names emitted by Tauri itself.
+*
+* These are the raw names behind the `on*` helpers of the `Window` and `Webview`
+* classes (e.g. `Window.onResized` listens to {@linkcode TauriEvent.WINDOW_RESIZED}).
+* Prefer those helpers when one exists, since they also decode the payload into
+* the matching class (`PhysicalSize`, `PhysicalPosition`, ...).
+*
+* @example
+* ```typescript
+* import { listen, TauriEvent } from '@tauri-apps/api/event';
+* const unlisten = await listen(TauriEvent.WINDOW_DESTROYED, (event) => {
+*   console.log('a window was destroyed', event.payload);
+* });
+* ```
+*
+* @since 1.1.0
+*/
+var TauriEvent;
+(function(TauriEvent) {
+	/** A window was resized. Payload: the new inner size, in physical pixels. See `Window.onResized`. */
+	TauriEvent["WINDOW_RESIZED"] = "tauri://resize";
+	/** A window was moved. Payload: the new outer position, in physical pixels. See `Window.onMoved`. */
+	TauriEvent["WINDOW_MOVED"] = "tauri://move";
+	/**
+	* The user requested a window to be closed (e.g. clicked the close button).
+	* See `Window.onCloseRequested`, which also handles preventing the close.
+	*/
+	TauriEvent["WINDOW_CLOSE_REQUESTED"] = "tauri://close-requested";
+	/** A window was destroyed, i.e. it is gone and its label can be reused. */
+	TauriEvent["WINDOW_DESTROYED"] = "tauri://destroyed";
+	/** A window gained focus. See `Window.onFocusChanged`. */
+	TauriEvent["WINDOW_FOCUS"] = "tauri://focus";
+	/** A window lost focus. See `Window.onFocusChanged`. */
+	TauriEvent["WINDOW_BLUR"] = "tauri://blur";
+	/**
+	* The scale factor of the monitor a window is on changed, or the window moved to
+	* a monitor with a different scale factor. See `Window.onScaleChanged`.
+	*/
+	TauriEvent["WINDOW_SCALE_FACTOR_CHANGED"] = "tauri://scale-change";
+	/** The system or window theme changed. See `Window.onThemeChanged`. */
+	TauriEvent["WINDOW_THEME_CHANGED"] = "tauri://theme-changed";
+	/** A new window was created. */
+	TauriEvent["WINDOW_CREATED"] = "tauri://window-created";
+	/**
+	* The window's event loop was suspended.
+	*
+	* #### Platform-specific
+	*
+	* - **Android:** emitted when the activity is paused.
+	* - **Other platforms:** never emitted.
+	*/
+	TauriEvent["WINDOW_SUSPENDED"] = "tauri://suspended";
+	/**
+	* The window's event loop was resumed after being suspended.
+	*
+	* #### Platform-specific
+	*
+	* - **Android:** emitted when the activity is resumed.
+	* - **Other platforms:** never emitted.
+	*/
+	TauriEvent["WINDOW_RESUMED"] = "tauri://resumed";
+	/** A new webview was created. */
+	TauriEvent["WEBVIEW_CREATED"] = "tauri://webview-created";
+	/** The user dragged files onto a webview. See `Webview.onDragDropEvent`. */
+	TauriEvent["DRAG_ENTER"] = "tauri://drag-enter";
+	/** The user is moving dragged files over a webview. See `Webview.onDragDropEvent`. */
+	TauriEvent["DRAG_OVER"] = "tauri://drag-over";
+	/** The user dropped files onto a webview. See `Webview.onDragDropEvent`. */
+	TauriEvent["DRAG_DROP"] = "tauri://drag-drop";
+	/** The drag operation left the webview or was cancelled. See `Webview.onDragDropEvent`. */
+	TauriEvent["DRAG_LEAVE"] = "tauri://drag-leave";
+})(TauriEvent || (TauriEvent = {}));
+/**
+* Unregister the event listener associated with the given name and id.
+*
+* @ignore
+* @param event The event name
+* @param eventId Event identifier
+* @returns
+*/
+async function _unlisten(event, eventId) {
+	window.__TAURI_EVENT_PLUGIN_INTERNALS__.unregisterListener(event, eventId);
+	await invoke("plugin:event|unlisten", {
+		event,
+		eventId
+	});
+}
+/**
+* Listen to an emitted event to any {@link EventTarget|target}.
+*
+* @example
+* ```typescript
+* import { listen } from '@tauri-apps/api/event';
+* const unlisten = await listen<string>('error', (event) => {
+*   console.log(`Got error, payload: ${event.payload}`);
+* });
+*
+* // call unlisten when your handler goes out of scope e.g. the component is unmounted
+* unlisten();
+* ```
+*
+* @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
+* @param handler Event handler callback.
+* @param options Event listening options.
+* @returns A promise resolving to a function to unlisten to the event.
+*
+* @remarks Listeners bound to a window or webview are removed automatically when
+* that window or webview is destroyed, so you do not need to unlisten just to
+* avoid leaking across a window close. You should still call the returned
+* function when the listener's own scope ends — for example on page navigation
+* or when a component unmounts — otherwise the handler keeps running for the
+* lifetime of the webview.
+*
+* @since 1.0.0
+*/
+async function listen(event, handler, options) {
+	var _a;
+	const target = typeof (options === null || options === void 0 ? void 0 : options.target) === "string" ? {
+		kind: "AnyLabel",
+		label: options.target
+	} : (_a = options === null || options === void 0 ? void 0 : options.target) !== null && _a !== void 0 ? _a : { kind: "Any" };
+	return invoke("plugin:event|listen", {
+		event,
+		target,
+		handler: transformCallback(handler)
+	}).then((eventId) => {
+		return async () => _unlisten(event, eventId);
+	});
+}
+/**
+* Listens once to an emitted event to any {@link EventTarget|target}.
+*
+* @example
+* ```typescript
+* import { once } from '@tauri-apps/api/event';
+* interface LoadedPayload {
+*   loggedIn: boolean,
+*   token: string
+* }
+* const unlisten = await once<LoadedPayload>('loaded', (event) => {
+*   console.log(`App is loaded, loggedIn: ${event.payload.loggedIn}, token: ${event.payload.token}`);
+* });
+*
+* // call unlisten when your handler goes out of scope e.g. the component is unmounted
+* unlisten();
+* ```
+*
+* @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
+* @param handler Event handler callback.
+* @param options Event listening options.
+* @returns A promise resolving to a function to unlisten to the event.
+*
+* @remarks The listener removes itself after the first event, and listeners bound
+* to a window or webview are also removed automatically when that target is
+* destroyed. Still call the returned function when the listener's own scope ends
+* before the event arrives — for example on page navigation or component unmount.
+*
+* @since 1.0.0
+*/
+async function once(event, handler, options) {
+	return listen(event, (eventData) => {
+		_unlisten(event, eventData.id);
+		handler(eventData);
+	}, options);
+}
+/**
+* Emits an event to all {@link EventTarget|targets}.
+*
+* @example
+* ```typescript
+* import { emit } from '@tauri-apps/api/event';
+* await emit('frontend-loaded', { loggedIn: true, token: 'authToken' });
+* ```
+*
+* @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
+* @param payload Event payload.
+*
+* @since 1.0.0
+*/
+async function emit(event, payload) {
+	await invoke("plugin:event|emit", {
+		event,
+		payload
+	});
+}
+/**
+* Emits an event to all {@link EventTarget|targets} matching the given target.
+*
+* @example
+* ```typescript
+* import { emitTo } from '@tauri-apps/api/event';
+* await emitTo('main', 'frontend-loaded', { loggedIn: true, token: 'authToken' });
+* ```
+*
+* @param target Label of the target Window/Webview/WebviewWindow or raw {@link EventTarget} object.
+* @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
+* @param payload Event payload.
+*
+* @since 2.0.0
+*/
+async function emitTo(target, event, payload) {
+	await invoke("plugin:event|emit_to", {
+		target: typeof target === "string" ? {
+			kind: "AnyLabel",
+			label: target
+		} : target,
+		event,
+		payload
+	});
+}
+export { TauriEvent, emit, emitTo, listen, once };
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQHRhdXJpLWFwcHNfYXBpX2V2ZW50LmpzIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi4uLy4uL0B0YXVyaS1hcHBzL2FwaS9ldmVudC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBpbnZva2UsIHRyYW5zZm9ybUNhbGxiYWNrIH0gZnJvbSAnLi9jb3JlLmpzJztcblxuLy8gQ29weXJpZ2h0IDIwMTktMjAyNCBUYXVyaSBQcm9ncmFtbWUgd2l0aGluIFRoZSBDb21tb25zIENvbnNlcnZhbmN5XG4vLyBTUERYLUxpY2Vuc2UtSWRlbnRpZmllcjogQXBhY2hlLTIuMFxuLy8gU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IE1JVFxuLyoqXG4gKiBUaGUgZXZlbnQgc3lzdGVtIGFsbG93cyB5b3UgdG8gZW1pdCBldmVudHMgdG8gdGhlIGJhY2tlbmQgYW5kIGxpc3RlbiB0byBldmVudHMgZnJvbSBpdC5cbiAqXG4gKiBUaGlzIHBhY2thZ2UgaXMgYWxzbyBhY2Nlc3NpYmxlIHdpdGggYHdpbmRvdy5fX1RBVVJJX18uZXZlbnRgIHdoZW4gW2BhcHAud2l0aEdsb2JhbFRhdXJpYF0oaHR0cHM6Ly92Mi50YXVyaS5hcHAvcmVmZXJlbmNlL2NvbmZpZy8jd2l0aGdsb2JhbHRhdXJpKSBpbiBgdGF1cmkuY29uZi5qc29uYCBpcyBzZXQgdG8gYHRydWVgLlxuICpcbiAqIEByZW1hcmtzIEFsbCBjb21tYW5kcyB1c2VkIGJ5IHRoaXMgbW9kdWxlIChgY29yZTpldmVudDphbGxvdy1saXN0ZW5gLFxuICogYGFsbG93LXVubGlzdGVuYCwgYGFsbG93LWVtaXRgIGFuZCBgYWxsb3ctZW1pdC10b2ApIGFyZSBwYXJ0IG9mIHRoZVxuICogYGNvcmU6ZXZlbnQ6ZGVmYXVsdGAgcGVybWlzc2lvbiBzZXQsIHdoaWNoIGlzIGVuYWJsZWQgYnkgZGVmYXVsdCwgc28gbm8gZXh0cmFcbiAqIGNhcGFiaWxpdHkgY29uZmlndXJhdGlvbiBpcyBuZWVkZWQuXG4gKlxuICogQG1vZHVsZVxuICovXG4vKipcbiAqIFRoZSBidWlsdC1pbiBldmVudCBuYW1lcyBlbWl0dGVkIGJ5IFRhdXJpIGl0c2VsZi5cbiAqXG4gKiBUaGVzZSBhcmUgdGhlIHJhdyBuYW1lcyBiZWhpbmQgdGhlIGBvbipgIGhlbHBlcnMgb2YgdGhlIGBXaW5kb3dgIGFuZCBgV2Vidmlld2BcbiAqIGNsYXNzZXMgKGUuZy4gYFdpbmRvdy5vblJlc2l6ZWRgIGxpc3RlbnMgdG8ge0BsaW5rY29kZSBUYXVyaUV2ZW50LldJTkRPV19SRVNJWkVEfSkuXG4gKiBQcmVmZXIgdGhvc2UgaGVscGVycyB3aGVuIG9uZSBleGlzdHMsIHNpbmNlIHRoZXkgYWxzbyBkZWNvZGUgdGhlIHBheWxvYWQgaW50b1xuICogdGhlIG1hdGNoaW5nIGNsYXNzIChgUGh5c2ljYWxTaXplYCwgYFBoeXNpY2FsUG9zaXRpb25gLCAuLi4pLlxuICpcbiAqIEBleGFtcGxlXG4gKiBgYGB0eXBlc2NyaXB0XG4gKiBpbXBvcnQgeyBsaXN0ZW4sIFRhdXJpRXZlbnQgfSBmcm9tICdAdGF1cmktYXBwcy9hcGkvZXZlbnQnO1xuICogY29uc3QgdW5saXN0ZW4gPSBhd2FpdCBsaXN0ZW4oVGF1cmlFdmVudC5XSU5ET1dfREVTVFJPWUVELCAoZXZlbnQpID0+IHtcbiAqICAgY29uc29sZS5sb2coJ2Egd2luZG93IHdhcyBkZXN0cm95ZWQnLCBldmVudC5wYXlsb2FkKTtcbiAqIH0pO1xuICogYGBgXG4gKlxuICogQHNpbmNlIDEuMS4wXG4gKi9cbnZhciBUYXVyaUV2ZW50O1xuKGZ1bmN0aW9uIChUYXVyaUV2ZW50KSB7XG4gICAgLyoqIEEgd2luZG93IHdhcyByZXNpemVkLiBQYXlsb2FkOiB0aGUgbmV3IGlubmVyIHNpemUsIGluIHBoeXNpY2FsIHBpeGVscy4gU2VlIGBXaW5kb3cub25SZXNpemVkYC4gKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX1JFU0laRURcIl0gPSBcInRhdXJpOi8vcmVzaXplXCI7XG4gICAgLyoqIEEgd2luZG93IHdhcyBtb3ZlZC4gUGF5bG9hZDogdGhlIG5ldyBvdXRlciBwb3NpdGlvbiwgaW4gcGh5c2ljYWwgcGl4ZWxzLiBTZWUgYFdpbmRvdy5vbk1vdmVkYC4gKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX01PVkVEXCJdID0gXCJ0YXVyaTovL21vdmVcIjtcbiAgICAvKipcbiAgICAgKiBUaGUgdXNlciByZXF1ZXN0ZWQgYSB3aW5kb3cgdG8gYmUgY2xvc2VkIChlLmcuIGNsaWNrZWQgdGhlIGNsb3NlIGJ1dHRvbikuXG4gICAgICogU2VlIGBXaW5kb3cub25DbG9zZVJlcXVlc3RlZGAsIHdoaWNoIGFsc28gaGFuZGxlcyBwcmV2ZW50aW5nIHRoZSBjbG9zZS5cbiAgICAgKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX0NMT1NFX1JFUVVFU1RFRFwiXSA9IFwidGF1cmk6Ly9jbG9zZS1yZXF1ZXN0ZWRcIjtcbiAgICAvKiogQSB3aW5kb3cgd2FzIGRlc3Ryb3llZCwgaS5lLiBpdCBpcyBnb25lIGFuZCBpdHMgbGFiZWwgY2FuIGJlIHJldXNlZC4gKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX0RFU1RST1lFRFwiXSA9IFwidGF1cmk6Ly9kZXN0cm95ZWRcIjtcbiAgICAvKiogQSB3aW5kb3cgZ2FpbmVkIGZvY3VzLiBTZWUgYFdpbmRvdy5vbkZvY3VzQ2hhbmdlZGAuICovXG4gICAgVGF1cmlFdmVudFtcIldJTkRPV19GT0NVU1wiXSA9IFwidGF1cmk6Ly9mb2N1c1wiO1xuICAgIC8qKiBBIHdpbmRvdyBsb3N0IGZvY3VzLiBTZWUgYFdpbmRvdy5vbkZvY3VzQ2hhbmdlZGAuICovXG4gICAgVGF1cmlFdmVudFtcIldJTkRPV19CTFVSXCJdID0gXCJ0YXVyaTovL2JsdXJcIjtcbiAgICAvKipcbiAgICAgKiBUaGUgc2NhbGUgZmFjdG9yIG9mIHRoZSBtb25pdG9yIGEgd2luZG93IGlzIG9uIGNoYW5nZWQsIG9yIHRoZSB3aW5kb3cgbW92ZWQgdG9cbiAgICAgKiBhIG1vbml0b3Igd2l0aCBhIGRpZmZlcmVudCBzY2FsZSBmYWN0b3IuIFNlZSBgV2luZG93Lm9uU2NhbGVDaGFuZ2VkYC5cbiAgICAgKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX1NDQUxFX0ZBQ1RPUl9DSEFOR0VEXCJdID0gXCJ0YXVyaTovL3NjYWxlLWNoYW5nZVwiO1xuICAgIC8qKiBUaGUgc3lzdGVtIG9yIHdpbmRvdyB0aGVtZSBjaGFuZ2VkLiBTZWUgYFdpbmRvdy5vblRoZW1lQ2hhbmdlZGAuICovXG4gICAgVGF1cmlFdmVudFtcIldJTkRPV19USEVNRV9DSEFOR0VEXCJdID0gXCJ0YXVyaTovL3RoZW1lLWNoYW5nZWRcIjtcbiAgICAvKiogQSBuZXcgd2luZG93IHdhcyBjcmVhdGVkLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJXSU5ET1dfQ1JFQVRFRFwiXSA9IFwidGF1cmk6Ly93aW5kb3ctY3JlYXRlZFwiO1xuICAgIC8qKlxuICAgICAqIFRoZSB3aW5kb3cncyBldmVudCBsb29wIHdhcyBzdXNwZW5kZWQuXG4gICAgICpcbiAgICAgKiAjIyMjIFBsYXRmb3JtLXNwZWNpZmljXG4gICAgICpcbiAgICAgKiAtICoqQW5kcm9pZDoqKiBlbWl0dGVkIHdoZW4gdGhlIGFjdGl2aXR5IGlzIHBhdXNlZC5cbiAgICAgKiAtICoqT3RoZXIgcGxhdGZvcm1zOioqIG5ldmVyIGVtaXR0ZWQuXG4gICAgICovXG4gICAgVGF1cmlFdmVudFtcIldJTkRPV19TVVNQRU5ERURcIl0gPSBcInRhdXJpOi8vc3VzcGVuZGVkXCI7XG4gICAgLyoqXG4gICAgICogVGhlIHdpbmRvdydzIGV2ZW50IGxvb3Agd2FzIHJlc3VtZWQgYWZ0ZXIgYmVpbmcgc3VzcGVuZGVkLlxuICAgICAqXG4gICAgICogIyMjIyBQbGF0Zm9ybS1zcGVjaWZpY1xuICAgICAqXG4gICAgICogLSAqKkFuZHJvaWQ6KiogZW1pdHRlZCB3aGVuIHRoZSBhY3Rpdml0eSBpcyByZXN1bWVkLlxuICAgICAqIC0gKipPdGhlciBwbGF0Zm9ybXM6KiogbmV2ZXIgZW1pdHRlZC5cbiAgICAgKi9cbiAgICBUYXVyaUV2ZW50W1wiV0lORE9XX1JFU1VNRURcIl0gPSBcInRhdXJpOi8vcmVzdW1lZFwiO1xuICAgIC8qKiBBIG5ldyB3ZWJ2aWV3IHdhcyBjcmVhdGVkLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJXRUJWSUVXX0NSRUFURURcIl0gPSBcInRhdXJpOi8vd2Vidmlldy1jcmVhdGVkXCI7XG4gICAgLyoqIFRoZSB1c2VyIGRyYWdnZWQgZmlsZXMgb250byBhIHdlYnZpZXcuIFNlZSBgV2Vidmlldy5vbkRyYWdEcm9wRXZlbnRgLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJEUkFHX0VOVEVSXCJdID0gXCJ0YXVyaTovL2RyYWctZW50ZXJcIjtcbiAgICAvKiogVGhlIHVzZXIgaXMgbW92aW5nIGRyYWdnZWQgZmlsZXMgb3ZlciBhIHdlYnZpZXcuIFNlZSBgV2Vidmlldy5vbkRyYWdEcm9wRXZlbnRgLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJEUkFHX09WRVJcIl0gPSBcInRhdXJpOi8vZHJhZy1vdmVyXCI7XG4gICAgLyoqIFRoZSB1c2VyIGRyb3BwZWQgZmlsZXMgb250byBhIHdlYnZpZXcuIFNlZSBgV2Vidmlldy5vbkRyYWdEcm9wRXZlbnRgLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJEUkFHX0RST1BcIl0gPSBcInRhdXJpOi8vZHJhZy1kcm9wXCI7XG4gICAgLyoqIFRoZSBkcmFnIG9wZXJhdGlvbiBsZWZ0IHRoZSB3ZWJ2aWV3IG9yIHdhcyBjYW5jZWxsZWQuIFNlZSBgV2Vidmlldy5vbkRyYWdEcm9wRXZlbnRgLiAqL1xuICAgIFRhdXJpRXZlbnRbXCJEUkFHX0xFQVZFXCJdID0gXCJ0YXVyaTovL2RyYWctbGVhdmVcIjtcbn0pKFRhdXJpRXZlbnQgfHwgKFRhdXJpRXZlbnQgPSB7fSkpO1xuLyoqXG4gKiBVbnJlZ2lzdGVyIHRoZSBldmVudCBsaXN0ZW5lciBhc3NvY2lhdGVkIHdpdGggdGhlIGdpdmVuIG5hbWUgYW5kIGlkLlxuICpcbiAqIEBpZ25vcmVcbiAqIEBwYXJhbSBldmVudCBUaGUgZXZlbnQgbmFtZVxuICogQHBhcmFtIGV2ZW50SWQgRXZlbnQgaWRlbnRpZmllclxuICogQHJldHVybnNcbiAqL1xuYXN5bmMgZnVuY3Rpb24gX3VubGlzdGVuKGV2ZW50LCBldmVudElkKSB7XG4gICAgd2luZG93Ll9fVEFVUklfRVZFTlRfUExVR0lOX0lOVEVSTkFMU19fLnVucmVnaXN0ZXJMaXN0ZW5lcihldmVudCwgZXZlbnRJZCk7XG4gICAgYXdhaXQgaW52b2tlKCdwbHVnaW46ZXZlbnR8dW5saXN0ZW4nLCB7XG4gICAgICAgIGV2ZW50LFxuICAgICAgICBldmVudElkXG4gICAgfSk7XG59XG4vKipcbiAqIExpc3RlbiB0byBhbiBlbWl0dGVkIGV2ZW50IHRvIGFueSB7QGxpbmsgRXZlbnRUYXJnZXR8dGFyZ2V0fS5cbiAqXG4gKiBAZXhhbXBsZVxuICogYGBgdHlwZXNjcmlwdFxuICogaW1wb3J0IHsgbGlzdGVuIH0gZnJvbSAnQHRhdXJpLWFwcHMvYXBpL2V2ZW50JztcbiAqIGNvbnN0IHVubGlzdGVuID0gYXdhaXQgbGlzdGVuPHN0cmluZz4oJ2Vycm9yJywgKGV2ZW50KSA9PiB7XG4gKiAgIGNvbnNvbGUubG9nKGBHb3QgZXJyb3IsIHBheWxvYWQ6ICR7ZXZlbnQucGF5bG9hZH1gKTtcbiAqIH0pO1xuICpcbiAqIC8vIGNhbGwgdW5saXN0ZW4gd2hlbiB5b3VyIGhhbmRsZXIgZ29lcyBvdXQgb2Ygc2NvcGUgZS5nLiB0aGUgY29tcG9uZW50IGlzIHVubW91bnRlZFxuICogdW5saXN0ZW4oKTtcbiAqIGBgYFxuICpcbiAqIEBwYXJhbSBldmVudCBFdmVudCBuYW1lLiBNdXN0IGluY2x1ZGUgb25seSBhbHBoYW51bWVyaWMgY2hhcmFjdGVycywgYC1gLCBgL2AsIGA6YCBhbmQgYF9gLlxuICogQHBhcmFtIGhhbmRsZXIgRXZlbnQgaGFuZGxlciBjYWxsYmFjay5cbiAqIEBwYXJhbSBvcHRpb25zIEV2ZW50IGxpc3RlbmluZyBvcHRpb25zLlxuICogQHJldHVybnMgQSBwcm9taXNlIHJlc29sdmluZyB0byBhIGZ1bmN0aW9uIHRvIHVubGlzdGVuIHRvIHRoZSBldmVudC5cbiAqXG4gKiBAcmVtYXJrcyBMaXN0ZW5lcnMgYm91bmQgdG8gYSB3aW5kb3cgb3Igd2VidmlldyBhcmUgcmVtb3ZlZCBhdXRvbWF0aWNhbGx5IHdoZW5cbiAqIHRoYXQgd2luZG93IG9yIHdlYnZpZXcgaXMgZGVzdHJveWVkLCBzbyB5b3UgZG8gbm90IG5lZWQgdG8gdW5saXN0ZW4ganVzdCB0b1xuICogYXZvaWQgbGVha2luZyBhY3Jvc3MgYSB3aW5kb3cgY2xvc2UuIFlvdSBzaG91bGQgc3RpbGwgY2FsbCB0aGUgcmV0dXJuZWRcbiAqIGZ1bmN0aW9uIHdoZW4gdGhlIGxpc3RlbmVyJ3Mgb3duIHNjb3BlIGVuZHMg4oCUIGZvciBleGFtcGxlIG9uIHBhZ2UgbmF2aWdhdGlvblxuICogb3Igd2hlbiBhIGNvbXBvbmVudCB1bm1vdW50cyDigJQgb3RoZXJ3aXNlIHRoZSBoYW5kbGVyIGtlZXBzIHJ1bm5pbmcgZm9yIHRoZVxuICogbGlmZXRpbWUgb2YgdGhlIHdlYnZpZXcuXG4gKlxuICogQHNpbmNlIDEuMC4wXG4gKi9cbmFzeW5jIGZ1bmN0aW9uIGxpc3RlbihldmVudCwgaGFuZGxlciwgb3B0aW9ucykge1xuICAgIHZhciBfYTtcbiAgICBjb25zdCB0YXJnZXQgPSB0eXBlb2YgKG9wdGlvbnMgPT09IG51bGwgfHwgb3B0aW9ucyA9PT0gdm9pZCAwID8gdm9pZCAwIDogb3B0aW9ucy50YXJnZXQpID09PSAnc3RyaW5nJ1xuICAgICAgICA/IHsga2luZDogJ0FueUxhYmVsJywgbGFiZWw6IG9wdGlvbnMudGFyZ2V0IH1cbiAgICAgICAgOiAoKF9hID0gb3B0aW9ucyA9PT0gbnVsbCB8fCBvcHRpb25zID09PSB2b2lkIDAgPyB2b2lkIDAgOiBvcHRpb25zLnRhcmdldCkgIT09IG51bGwgJiYgX2EgIT09IHZvaWQgMCA/IF9hIDogeyBraW5kOiAnQW55JyB9KTtcbiAgICByZXR1cm4gaW52b2tlKCdwbHVnaW46ZXZlbnR8bGlzdGVuJywge1xuICAgICAgICBldmVudCxcbiAgICAgICAgdGFyZ2V0LFxuICAgICAgICBoYW5kbGVyOiB0cmFuc2Zvcm1DYWxsYmFjayhoYW5kbGVyKVxuICAgIH0pLnRoZW4oKGV2ZW50SWQpID0+IHtcbiAgICAgICAgcmV0dXJuIGFzeW5jICgpID0+IF91bmxpc3RlbihldmVudCwgZXZlbnRJZCk7XG4gICAgfSk7XG59XG4vKipcbiAqIExpc3RlbnMgb25jZSB0byBhbiBlbWl0dGVkIGV2ZW50IHRvIGFueSB7QGxpbmsgRXZlbnRUYXJnZXR8dGFyZ2V0fS5cbiAqXG4gKiBAZXhhbXBsZVxuICogYGBgdHlwZXNjcmlwdFxuICogaW1wb3J0IHsgb25jZSB9IGZyb20gJ0B0YXVyaS1hcHBzL2FwaS9ldmVudCc7XG4gKiBpbnRlcmZhY2UgTG9hZGVkUGF5bG9hZCB7XG4gKiAgIGxvZ2dlZEluOiBib29sZWFuLFxuICogICB0b2tlbjogc3RyaW5nXG4gKiB9XG4gKiBjb25zdCB1bmxpc3RlbiA9IGF3YWl0IG9uY2U8TG9hZGVkUGF5bG9hZD4oJ2xvYWRlZCcsIChldmVudCkgPT4ge1xuICogICBjb25zb2xlLmxvZyhgQXBwIGlzIGxvYWRlZCwgbG9nZ2VkSW46ICR7ZXZlbnQucGF5bG9hZC5sb2dnZWRJbn0sIHRva2VuOiAke2V2ZW50LnBheWxvYWQudG9rZW59YCk7XG4gKiB9KTtcbiAqXG4gKiAvLyBjYWxsIHVubGlzdGVuIHdoZW4geW91ciBoYW5kbGVyIGdvZXMgb3V0IG9mIHNjb3BlIGUuZy4gdGhlIGNvbXBvbmVudCBpcyB1bm1vdW50ZWRcbiAqIHVubGlzdGVuKCk7XG4gKiBgYGBcbiAqXG4gKiBAcGFyYW0gZXZlbnQgRXZlbnQgbmFtZS4gTXVzdCBpbmNsdWRlIG9ubHkgYWxwaGFudW1lcmljIGNoYXJhY3RlcnMsIGAtYCwgYC9gLCBgOmAgYW5kIGBfYC5cbiAqIEBwYXJhbSBoYW5kbGVyIEV2ZW50IGhhbmRsZXIgY2FsbGJhY2suXG4gKiBAcGFyYW0gb3B0aW9ucyBFdmVudCBsaXN0ZW5pbmcgb3B0aW9ucy5cbiAqIEByZXR1cm5zIEEgcHJvbWlzZSByZXNvbHZpbmcgdG8gYSBmdW5jdGlvbiB0byB1bmxpc3RlbiB0byB0aGUgZXZlbnQuXG4gKlxuICogQHJlbWFya3MgVGhlIGxpc3RlbmVyIHJlbW92ZXMgaXRzZWxmIGFmdGVyIHRoZSBmaXJzdCBldmVudCwgYW5kIGxpc3RlbmVycyBib3VuZFxuICogdG8gYSB3aW5kb3cgb3Igd2VidmlldyBhcmUgYWxzbyByZW1vdmVkIGF1dG9tYXRpY2FsbHkgd2hlbiB0aGF0IHRhcmdldCBpc1xuICogZGVzdHJveWVkLiBTdGlsbCBjYWxsIHRoZSByZXR1cm5lZCBmdW5jdGlvbiB3aGVuIHRoZSBsaXN0ZW5lcidzIG93biBzY29wZSBlbmRzXG4gKiBiZWZvcmUgdGhlIGV2ZW50IGFycml2ZXMg4oCUIGZvciBleGFtcGxlIG9uIHBhZ2UgbmF2aWdhdGlvbiBvciBjb21wb25lbnQgdW5tb3VudC5cbiAqXG4gKiBAc2luY2UgMS4wLjBcbiAqL1xuYXN5bmMgZnVuY3Rpb24gb25jZShldmVudCwgaGFuZGxlciwgb3B0aW9ucykge1xuICAgIHJldHVybiBsaXN0ZW4oZXZlbnQsIChldmVudERhdGEpID0+IHtcbiAgICAgICAgdm9pZCBfdW5saXN0ZW4oZXZlbnQsIGV2ZW50RGF0YS5pZCk7XG4gICAgICAgIGhhbmRsZXIoZXZlbnREYXRhKTtcbiAgICB9LCBvcHRpb25zKTtcbn1cbi8qKlxuICogRW1pdHMgYW4gZXZlbnQgdG8gYWxsIHtAbGluayBFdmVudFRhcmdldHx0YXJnZXRzfS5cbiAqXG4gKiBAZXhhbXBsZVxuICogYGBgdHlwZXNjcmlwdFxuICogaW1wb3J0IHsgZW1pdCB9IGZyb20gJ0B0YXVyaS1hcHBzL2FwaS9ldmVudCc7XG4gKiBhd2FpdCBlbWl0KCdmcm9udGVuZC1sb2FkZWQnLCB7IGxvZ2dlZEluOiB0cnVlLCB0b2tlbjogJ2F1dGhUb2tlbicgfSk7XG4gKiBgYGBcbiAqXG4gKiBAcGFyYW0gZXZlbnQgRXZlbnQgbmFtZS4gTXVzdCBpbmNsdWRlIG9ubHkgYWxwaGFudW1lcmljIGNoYXJhY3RlcnMsIGAtYCwgYC9gLCBgOmAgYW5kIGBfYC5cbiAqIEBwYXJhbSBwYXlsb2FkIEV2ZW50IHBheWxvYWQuXG4gKlxuICogQHNpbmNlIDEuMC4wXG4gKi9cbmFzeW5jIGZ1bmN0aW9uIGVtaXQoZXZlbnQsIHBheWxvYWQpIHtcbiAgICBhd2FpdCBpbnZva2UoJ3BsdWdpbjpldmVudHxlbWl0Jywge1xuICAgICAgICBldmVudCxcbiAgICAgICAgcGF5bG9hZFxuICAgIH0pO1xufVxuLyoqXG4gKiBFbWl0cyBhbiBldmVudCB0byBhbGwge0BsaW5rIEV2ZW50VGFyZ2V0fHRhcmdldHN9IG1hdGNoaW5nIHRoZSBnaXZlbiB0YXJnZXQuXG4gKlxuICogQGV4YW1wbGVcbiAqIGBgYHR5cGVzY3JpcHRcbiAqIGltcG9ydCB7IGVtaXRUbyB9IGZyb20gJ0B0YXVyaS1hcHBzL2FwaS9ldmVudCc7XG4gKiBhd2FpdCBlbWl0VG8oJ21haW4nLCAnZnJvbnRlbmQtbG9hZGVkJywgeyBsb2dnZWRJbjogdHJ1ZSwgdG9rZW46ICdhdXRoVG9rZW4nIH0pO1xuICogYGBgXG4gKlxuICogQHBhcmFtIHRhcmdldCBMYWJlbCBvZiB0aGUgdGFyZ2V0IFdpbmRvdy9XZWJ2aWV3L1dlYnZpZXdXaW5kb3cgb3IgcmF3IHtAbGluayBFdmVudFRhcmdldH0gb2JqZWN0LlxuICogQHBhcmFtIGV2ZW50IEV2ZW50IG5hbWUuIE11c3QgaW5jbHVkZSBvbmx5IGFscGhhbnVtZXJpYyBjaGFyYWN0ZXJzLCBgLWAsIGAvYCwgYDpgIGFuZCBgX2AuXG4gKiBAcGFyYW0gcGF5bG9hZCBFdmVudCBwYXlsb2FkLlxuICpcbiAqIEBzaW5jZSAyLjAuMFxuICovXG5hc3luYyBmdW5jdGlvbiBlbWl0VG8odGFyZ2V0LCBldmVudCwgcGF5bG9hZCkge1xuICAgIGNvbnN0IGV2ZW50VGFyZ2V0ID0gdHlwZW9mIHRhcmdldCA9PT0gJ3N0cmluZycgPyB7IGtpbmQ6ICdBbnlMYWJlbCcsIGxhYmVsOiB0YXJnZXQgfSA6IHRhcmdldDtcbiAgICBhd2FpdCBpbnZva2UoJ3BsdWdpbjpldmVudHxlbWl0X3RvJywge1xuICAgICAgICB0YXJnZXQ6IGV2ZW50VGFyZ2V0LFxuICAgICAgICBldmVudCxcbiAgICAgICAgcGF5bG9hZFxuICAgIH0pO1xufVxuXG5leHBvcnQgeyBUYXVyaUV2ZW50LCBlbWl0LCBlbWl0VG8sIGxpc3Rlbiwgb25jZSB9O1xuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQW1DQSxJQUFJO0NBQ0gsU0FBVSxZQUFZOztDQUVuQixXQUFXLG9CQUFvQjs7Q0FFL0IsV0FBVyxrQkFBa0I7Ozs7O0NBSzdCLFdBQVcsNEJBQTRCOztDQUV2QyxXQUFXLHNCQUFzQjs7Q0FFakMsV0FBVyxrQkFBa0I7O0NBRTdCLFdBQVcsaUJBQWlCOzs7OztDQUs1QixXQUFXLGlDQUFpQzs7Q0FFNUMsV0FBVywwQkFBMEI7O0NBRXJDLFdBQVcsb0JBQW9COzs7Ozs7Ozs7Q0FTL0IsV0FBVyxzQkFBc0I7Ozs7Ozs7OztDQVNqQyxXQUFXLG9CQUFvQjs7Q0FFL0IsV0FBVyxxQkFBcUI7O0NBRWhDLFdBQVcsZ0JBQWdCOztDQUUzQixXQUFXLGVBQWU7O0NBRTFCLFdBQVcsZUFBZTs7Q0FFMUIsV0FBVyxnQkFBZ0I7QUFDL0IsRUFBQSxDQUFHLGVBQWUsYUFBYSxDQUFDLEVBQUU7Ozs7Ozs7OztBQVNsQyxlQUFlLFVBQVUsT0FBTyxTQUFTO0NBQ3JDLE9BQU8saUNBQWlDLG1CQUFtQixPQUFPLE9BQU87Q0FDekUsTUFBTSxPQUFPLHlCQUF5QjtFQUNsQztFQUNBO0NBQ0osQ0FBQztBQUNMOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQTZCQSxlQUFlLE9BQU8sT0FBTyxTQUFTLFNBQVM7Q0FDM0MsSUFBSTtDQUNKLE1BQU0sU0FBUyxRQUFRLFlBQVksUUFBUSxZQUFZLEtBQUssSUFBSSxLQUFLLElBQUksUUFBUSxZQUFZLFdBQ3ZGO0VBQUUsTUFBTTtFQUFZLE9BQU8sUUFBUTtDQUFPLEtBQ3hDLEtBQUssWUFBWSxRQUFRLFlBQVksS0FBSyxJQUFJLEtBQUssSUFBSSxRQUFRLFlBQVksUUFBUSxPQUFPLEtBQUssSUFBSSxLQUFLLEVBQUUsTUFBTSxNQUFNO0NBQzlILE9BQU8sT0FBTyx1QkFBdUI7RUFDakM7RUFDQTtFQUNBLFNBQVMsa0JBQWtCLE9BQU87Q0FDdEMsQ0FBQyxDQUFDLENBQUMsTUFBTSxZQUFZO0VBQ2pCLE9BQU8sWUFBWSxVQUFVLE9BQU8sT0FBTztDQUMvQyxDQUFDO0FBQ0w7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUErQkEsZUFBZSxLQUFLLE9BQU8sU0FBUyxTQUFTO0NBQ3pDLE9BQU8sT0FBTyxRQUFRLGNBQWM7RUFDaEMsVUFBZSxPQUFPLFVBQVUsRUFBRTtFQUNsQyxRQUFRLFNBQVM7Q0FDckIsR0FBRyxPQUFPO0FBQ2Q7Ozs7Ozs7Ozs7Ozs7OztBQWVBLGVBQWUsS0FBSyxPQUFPLFNBQVM7Q0FDaEMsTUFBTSxPQUFPLHFCQUFxQjtFQUM5QjtFQUNBO0NBQ0osQ0FBQztBQUNMOzs7Ozs7Ozs7Ozs7Ozs7O0FBZ0JBLGVBQWUsT0FBTyxRQUFRLE9BQU8sU0FBUztDQUUxQyxNQUFNLE9BQU8sd0JBQXdCO0VBQ2pDLFFBRmdCLE9BQU8sV0FBVyxXQUFXO0dBQUUsTUFBTTtHQUFZLE9BQU87RUFBTyxJQUFJO0VBR25GO0VBQ0E7Q0FDSixDQUFDO0FBQ0wiLCJ4X2dvb2dsZV9pZ25vcmVMaXN0IjpbMF19
